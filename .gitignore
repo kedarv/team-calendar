@@ -1,0 +1,6 @@
+.vscode/
+frontend/*.html
+.env
+.DS_STORE
+Pipfile.lock
+*.sqlite
