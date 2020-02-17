@@ -27,12 +27,15 @@ HEADERS = {
 }
 PATTERN = r"(?<=ATTENDEE:).*?(?=@)"
 
-
 def write_html(resources, events):
     env = Environment(loader=FileSystemLoader("templates"))
-    template = env.get_template("calendar.j2")
-    rendered_template = template.render(resources=resources, events=events)
-    with open("frontend/index.html", "w") as f:
+    template = env.get_template("App.j2")
+    rendered_template = template.render(
+        resources=resources,
+        events=events,
+        calendar_name=os.getenv("CALENDAR_NAME")
+    )
+    with open("frontend/src/App.js", "w") as f:
         f.write(rendered_template)
 
 
