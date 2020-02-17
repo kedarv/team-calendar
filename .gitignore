@@ -19,3 +19,6 @@ yarn-error.log*
 .npm/
 yarn.lock
 frontend/src/generated_data/
+*.pickle
+credentials.json
+__pycache__

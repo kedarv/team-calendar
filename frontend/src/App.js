@@ -16,15 +16,15 @@ export default class App extends React.Component {
           plugins={[resourceTimelinePlugin]}
           resources={resourceData}
           events={eventData}
-          defaultView={"resourceTimelineYear"}
+          defaultView={"resourceTimelineMonth"}
           height={"auto"}
           resourceLabelText={"People"}
           aspectRatio={1.8}
           editable={false}
           header={{
             left: "today prev,next",
-            center: "",
-            right: "resourceTimelineDay,resourceTimelineYear"
+            center: "title",
+            right: "resourceTimelineDay,resourceTimelineMonth,resourceTimelineYear"
           }}
           schedulerLicenseKey={"GPL-My-Project-Is-Open-Source"}
         />
