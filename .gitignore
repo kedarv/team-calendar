@@ -18,4 +18,4 @@ yarn-error.log*
 /.changelog
 .npm/
 yarn.lock
-frontend/src/App.js
+frontend/src/generated_data/

@@ -7,8 +7,6 @@ import requests
 import requests_cache
 from dotenv import load_dotenv
 from ics import Calendar
-from jinja2 import Environment
-from jinja2 import FileSystemLoader
 
 load_dotenv()
 
@@ -27,17 +25,11 @@ HEADERS = {
 }
 PATTERN = r"(?<=ATTENDEE:).*?(?=@)"
 
-def write_html(resources, events):
-    env = Environment(loader=FileSystemLoader("templates"))
-    template = env.get_template("App.j2")
-    rendered_template = template.render(
-        resources=resources,
-        events=events,
-        calendar_name=os.getenv("CALENDAR_NAME")
-    )
-    with open("frontend/src/App.js", "w") as f:
-        f.write(rendered_template)
-
+def write_data(resources, events):
+    with open("frontend/src/generated_data/events.json", "w") as f:
+        json.dump(events, f, ensure_ascii=False)
+    with open("frontend/src/generated_data/resources.json", "w") as f:
+        json.dump(resources, f, ensure_ascii=False)
 
 req_json = requests.get(SCHEDULE_URL, headers=HEADERS).json()
 
@@ -60,4 +52,4 @@ for event in cal.events:
     )
 
 resources = [{"id": user, "title": user} for user in sorted(users)]
-write_html(resources, json.dumps(events))
+write_data(resources, events)

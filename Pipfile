@@ -11,7 +11,6 @@ ics = "*"
 ipdb = "*"
 requests-cache = "*"
 pre-commit = "*"
-jinja2 = "*"
 python-dotenv = "*"
 
 [requires]

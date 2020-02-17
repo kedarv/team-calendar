@@ -1,8 +1,10 @@
-{% raw %}
+
 import React from "react";
 import "./App.css";
 import FullCalendar from "@fullcalendar/react";
 import resourceTimelinePlugin from "@fullcalendar/resource-timeline";
+import eventData from "./generated_data/events.json";
+import resourceData from "./generated_data/resources.json";
 
 export default class App extends React.Component {
   calendarRef = React.createRef();
@@ -12,8 +14,8 @@ export default class App extends React.Component {
         <FullCalendar
           ref={this.calendarRef}
           plugins={[resourceTimelinePlugin]}
-          resources={{% endraw %}{{resources }}{% raw %}}
-          events={{% endraw %} {{events }} {% raw %}}
+          resources={resourceData}
+          events={eventData}
           defaultView={"resourceTimelineYear"}
           height={"auto"}
           resourceLabelText={"People"}
@@ -37,4 +39,3 @@ export default class App extends React.Component {
     calendar.scrollToTime(now - rangeStart - 300000000);
   }
 }
-{% endraw %}
