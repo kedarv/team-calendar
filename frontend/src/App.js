@@ -18,6 +18,12 @@ export default class App extends React.Component {
           events={eventData}
           defaultView={"resourceTimelineMonth"}
           height={"auto"}
+          scrollTime={'09:00'}
+          businessHours={{
+            daysOfWeek: [ 1, 2, 3, 4, 5 ], // Monday - Friday
+            startTime: '09:00',
+            endTime: '18:00',
+          }}
           resourceLabelText={"People"}
           aspectRatio={1.8}
           editable={false}

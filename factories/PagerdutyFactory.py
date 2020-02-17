@@ -1,16 +1,18 @@
-from factories.ResourceEventFactory import ResourceEventFactory
-import requests
-import requests_cache
-from dotenv import load_dotenv
-from ics import Calendar
-import json
 import os
 import re
 from datetime import timedelta
 
+import requests
+import requests_cache
+from dotenv import load_dotenv
+from ics import Calendar
+
+from factories.ResourceEventFactory import ResourceEventFactory
+
 EXPIRE_AFTER = timedelta(hours=1)
 requests_cache.install_cache("pd_cache", expire_after=EXPIRE_AFTER)
 load_dotenv()
+
 
 class PagerdutyFactory(ResourceEventFactory):
     PD_TOKEN = os.getenv("PD_TOKEN")
@@ -39,7 +41,7 @@ class PagerdutyFactory(ResourceEventFactory):
             events.append(
                 {
                     "id": event.uid,
-                    "resourceId": user + '@yelp.com',
+                    "resourceId": user + "@yelp.com",
                     "title": "📞 On Call",
                     "start": str(event.begin.to("US/Pacific")),
                     "end": str(event.end.to("US/Pacific")),
