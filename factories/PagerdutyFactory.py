@@ -27,9 +27,10 @@ class PagerdutyFactory(ResourceEventFactory):
             self.pd_teams = cfg["pagerduty"]["teams"]
 
     def generate(self):
+        events = []
         for team in self.pd_teams:
-            cal = self.get_calendar_data(team)
-            events = []
+            team_config = next(iter(team.values()))
+            cal = self.get_calendar_data(team_config["id"])
             for event in cal.events:
                 user = re.findall(self.PATTERN, str(event.extra))[0]
                 if user in self.users:
@@ -37,16 +38,16 @@ class PagerdutyFactory(ResourceEventFactory):
                         {
                             "id": event.uid,
                             "resourceId": user,
-                            "title": "📞 On Call",
+                            "title": team_config["display_text"],
                             "start": str(event.begin.to("US/Pacific")),
                             "end": str(event.end.to("US/Pacific")),
                         }
                     )
         return events
 
-    def get_calendar_data(self, team):
+    def get_calendar_data(self, team_id):
         schedule_url = "https://api.pagerduty.com/schedules/{}?time_zone=America/Los_Angeles".format(
-            team
+            team_id
         )
         headers = {
             "Accept": "application/vnd.pagerduty+json;version=2",
