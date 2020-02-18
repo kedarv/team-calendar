@@ -1,0 +1,6 @@
+users:
+  - someuser@somedomain.com
+pagerduty:
+  teams:
+    - some_pd_id
+  token: some_pd_token

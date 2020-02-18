@@ -1,5 +1,7 @@
 import json
 
+import yaml
+
 from factories.GoogleCalendarFactory import GoogleCalendarFactory
 from factories.PagerdutyFactory import PagerdutyFactory
 
@@ -12,22 +14,11 @@ def write_data(resources, events):
 
 
 def main():
-    users = [
-        "alfredt@yelp.com",
-        "gemperle@yelp.com",
-        "kedar@yelp.com",
-        "robbiep@yelp.com",
-        "saqif@yelp.com",
-        "slamba@yelp.com",
-        "timkitc@yelp.com",
-        "angellee@yelp.com",
-        "maulik@yelp.com",
-        "aryanc@yelp.com",
-        "qiqixu@yelp.com",
-        "bchan@yelp.com",
-        "dbajj@yelp.com",
-        "owenev@yelp.com",
-    ]
+    cfg = None
+    users = []
+    with open("config.yaml", "r") as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+        users = cfg["users"]
     factories = [PagerdutyFactory(users), GoogleCalendarFactory(users)]
     events = []
 
