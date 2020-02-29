@@ -2,8 +2,12 @@ from __future__ import print_function
 
 import os.path
 import pickle
-from datetime import date
+from datetime import *
 
+import dateutil.parser as parser
+from dateutil.rrule import rrule
+from dateutil.rrule import rruleset
+from dateutil.rrule import rrulestr
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
@@ -49,7 +53,8 @@ class GoogleCalendarFactory(ResourceEventFactory):
         )
         page_token = None
         exported_events = []
-        PTO_STRINGS = ["PTO", "Vacation", "🏝️", "🌴"]
+        PTO_STRINGS = ["pto", "vacation", "🏝️", "🌴"]
+        WFH_STRINGS = ["wfh", "working from home", "ooo"]
         for user in self.users:
             while True:
                 events = (
@@ -58,22 +63,104 @@ class GoogleCalendarFactory(ResourceEventFactory):
                     .execute()
                 )
                 for event in events["items"]:
-                    wfh = event.get("summary") in ["WFH"]
-                    pto = event.get("summary") in PTO_STRINGS
-                    if wfh or pto:
-                        exported_events.append(
-                            self.format_event(event, user, wfh, pto,)
+                    if event.get("creator", {}).get("self", False):
+                        wfh = any(
+                            title in event.get("summary", "").lower()
+                            for title in WFH_STRINGS
                         )
+                        pto = any(
+                            title in event.get("summary", "").lower()
+                            for title in PTO_STRINGS
+                        )
+                        if wfh or pto:
+                            start = parser.parse(
+                                event["start"].get(
+                                    "date", event["start"].get("dateTime")
+                                )
+                            )
+                            if event.get("recurrence"):
+                                recurring_events = parse_recurring_event(event)
+                                original_end = datetime.strptime(
+                                    event["end"].get(
+                                        "date", event["end"].get("dateTime")
+                                    ),
+                                    "%Y-%m-%d",
+                                )
+                                difference = original_end - start
+                                all_day = difference == timedelta(days=1)
+                                for recurring_event in recurring_events:
+                                    exported_events.append(
+                                        self.format_event(
+                                            event["id"]
+                                            + recurring_event.strftime("%Y-%m-%d"),
+                                            user,
+                                            recurring_event.strftime("%Y-%m-%d"),
+                                            (recurring_event + difference).strftime(
+                                                "%Y-%m-%d"
+                                            )
+                                            if not all_day
+                                            else None,
+                                            wfh,
+                                            pto,
+                                            all_day,
+                                        )
+                                    )
+                            else:
+                                end = parser.parse(
+                                    event["end"].get(
+                                        "date", event["end"].get("dateTime")
+                                    )
+                                )
+                                all_day = (end - start) == timedelta(days=1)
+                                exported_events.append(
+                                    self.format_event(
+                                        event["id"],
+                                        user,
+                                        start.isoformat(),
+                                        end.isoformat(),
+                                        wfh,
+                                        pto,
+                                        all_day,
+                                    )
+                                )
                     page_token = events.get("nextPageToken")
                 if not page_token:
                     break
         return exported_events
 
-    def format_event(self, event, user, wfh, pto):
+    def format_event(self, event_id, user, start, end, wfh, pto, all_day):
         return {
-            "id": event["id"],
+            "id": event_id,
             "resourceId": user,
             "title": "🏠 WFH" if wfh else "🌴 PTO",
-            "start": event["start"].get("date", event["start"].get("dateTime")),
-            "end": event["end"].get("date", event["end"].get("dateTime")),
+            "start": start,
+            "end": end,
+            "allDay": all_day,
         }
+
+
+def parse_recurring_event(event):
+    event_rrule = next(filter(lambda x: x.startswith("RRULE"), event["recurrence"]))
+    end_of_year = date(date.today().year, 12, 31).strftime("%Y%m%d")
+    excl_dates = parse_exdate(event)
+    event_rules = rrulestr(
+        s=event_rrule + ";UNTIL=" + end_of_year, dtstart=date(date.today().year, 1, 1)
+    )
+    if isinstance(event_rules, rrule):
+        rules = rruleset()
+        rules.rrule(event_rules)
+        event_rules = rules
+
+    for exd in excl_dates:
+        event_rules.exdate(exd)
+
+    return list(event_rules)
+
+
+def parse_exdate(event):
+    excl_dates = []
+    exdate = next(filter(lambda x: x.startswith("EXDATE"), event["recurrence"]))
+    name, values = exdate.split(":", 1)
+    for v in values.split(","):
+        excl_dates.append(datetime.strptime(v, "%Y%m%d"))
+    return excl_dates
