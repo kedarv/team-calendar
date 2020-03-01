@@ -5,6 +5,7 @@
   "homepage": ".",
   "dependencies": {
     "@fullcalendar/core": "^4.4.0",
+    "@fullcalendar/interaction": "^4.4.0",
     "@fullcalendar/react": "^4.4.0",
     "@fullcalendar/resource-timeline": "^4.4.0",
     "@testing-library/jest-dom": "^4.2.4",
@@ -12,7 +13,8 @@
     "@testing-library/user-event": "^7.1.2",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "react-scripts": "3.4.0"
+    "react-scripts": "3.4.0",
+    "react-tooltip": "^4.0.3"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -111,7 +111,9 @@ class GoogleCalendarFactory(ResourceEventFactory):
                                         "date", event["end"].get("dateTime")
                                     )
                                 )
-                                all_day = (end - start) == timedelta(days=1)
+                                all_day = (
+                                    int((end - start).total_seconds()) % 86400 == 0
+                                )
                                 exported_events.append(
                                     self.format_event(
                                         event["id"],
@@ -140,12 +142,11 @@ class GoogleCalendarFactory(ResourceEventFactory):
 
 
 def parse_recurring_event(event):
+    start = parser.parse(event["start"].get("date", event["start"].get("dateTime")))
     event_rrule = next(filter(lambda x: x.startswith("RRULE"), event["recurrence"]))
     end_of_year = date(date.today().year, 12, 31).strftime("%Y%m%d")
     excl_dates = parse_exdate(event)
-    event_rules = rrulestr(
-        s=event_rrule + ";UNTIL=" + end_of_year, dtstart=date(date.today().year, 1, 1)
-    )
+    event_rules = rrulestr(s=event_rrule + ";UNTIL=" + end_of_year, dtstart=start)
     if isinstance(event_rules, rrule):
         rules = rruleset()
         rules.rrule(event_rules)
