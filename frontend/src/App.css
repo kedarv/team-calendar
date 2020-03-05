@@ -3,6 +3,6 @@
 @import '~@fullcalendar/resource-timeline/main.css';
 
 #calendar {
-  max-width: 900px;
-  margin: 50px auto;
+  max-width: 95%;
+  margin: 10px auto;
 }

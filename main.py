@@ -19,7 +19,7 @@ def main():
     with open("config.yaml", "r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
         users = cfg["users"]
-    factories = [PagerdutyFactory(users), GoogleCalendarFactory(users)]
+    factories = [PagerdutyFactory(), GoogleCalendarFactory(users)]
     events = []
 
     for factory in factories:

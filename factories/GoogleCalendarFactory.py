@@ -80,11 +80,10 @@ class GoogleCalendarFactory(ResourceEventFactory):
                             )
                             if event.get("recurrence"):
                                 recurring_events = parse_recurring_event(event)
-                                original_end = datetime.strptime(
+                                original_end = parser.parse(
                                     event["end"].get(
                                         "date", event["end"].get("dateTime")
                                     ),
-                                    "%Y-%m-%d",
                                 )
                                 difference = original_end - start
                                 all_day = difference == timedelta(days=1)
@@ -146,7 +145,8 @@ def parse_recurring_event(event):
     event_rrule = next(filter(lambda x: x.startswith("RRULE"), event["recurrence"]))
     end_of_year = date(date.today().year, 12, 31).strftime("%Y%m%d")
     excl_dates = parse_exdate(event)
-    event_rules = rrulestr(s=event_rrule + ";UNTIL=" + end_of_year, dtstart=start)
+    until_str = ";UNTIL=" + end_of_year if "UNTIL" not in event_rrule else ""
+    event_rules = rrulestr(s=event_rrule + until_str, dtstart=start)
     if isinstance(event_rules, rrule):
         rules = rruleset()
         rules.rrule(event_rules)
@@ -160,8 +160,9 @@ def parse_recurring_event(event):
 
 def parse_exdate(event):
     excl_dates = []
-    exdate = next(filter(lambda x: x.startswith("EXDATE"), event["recurrence"]))
-    name, values = exdate.split(":", 1)
-    for v in values.split(","):
-        excl_dates.append(datetime.strptime(v, "%Y%m%d"))
+    if "EXDATE" in event.get("recurrence"):
+        exdate = next(filter(lambda x: x.startswith("EXDATE"), event["recurrence"]))
+        name, values = exdate.split(":", 1)
+        for v in values.split(","):
+            excl_dates.append(datetime.strptime(v, "%Y%m%d"))
     return excl_dates

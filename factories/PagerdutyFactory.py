@@ -17,14 +17,14 @@ class PagerdutyFactory(ResourceEventFactory):
     pd_token = None
     pd_teams = None
 
-    def __init__(self, users):
+    def __init__(self):
         super().__init__()
-        self.users = users
         cfg = None
         with open("config.yaml", "r") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
             self.pd_token = cfg["pagerduty"]["token"]
             self.pd_teams = cfg["pagerduty"]["teams"]
+            self.users = cfg["users"]
 
     def generate(self):
         events = []

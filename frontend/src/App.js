@@ -4,7 +4,7 @@ import FullCalendar from "@fullcalendar/react";
 import resourceTimelinePlugin from "@fullcalendar/resource-timeline";
 import eventData from "./generated_data/events.json";
 import resourceData from "./generated_data/resources.json";
-import ReactTooltip from 'react-tooltip';
+import ReactTooltip from "react-tooltip";
 import interactionPlugin from "@fullcalendar/interaction";
 
 export default class App extends React.Component {
@@ -37,7 +37,7 @@ export default class App extends React.Component {
           eventPositioned={this.handleEventPositioned}
           schedulerLicenseKey={"GPL-My-Project-Is-Open-Source"}
         />
-        <ReactTooltip place="top" type="dark" effect="float"/>
+        <ReactTooltip place="top" type="dark" effect="float" />
       </div>
     );
   }
@@ -50,8 +50,21 @@ export default class App extends React.Component {
   }
 
   handleEventPositioned(info) {
-    const resource = info.event.getResources()[0].title;
-    info.el.setAttribute("data-tip", resource + ' ' + info.event.title);
-     ReactTooltip.rebuild();
-   }
+    const title = generateTitle(info.event);
+    info.el.setAttribute(
+      "data-tip",
+      title
+    );
+    ReactTooltip.rebuild();
+  }
+}
+
+function generateTitle(event) {
+  const options = { month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+  const resource = event.getResources()[0].title;
+  let eventTitle = resource + " " + event.title
+  if(event.start && event.end) {
+    eventTitle += " " + event.start.toLocaleString("en-US", options) + " - " + event.end.toLocaleDateString("en-US", options)
+  }
+  return eventTitle;
 }
