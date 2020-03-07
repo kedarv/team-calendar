@@ -2,16 +2,21 @@ import React from "react";
 import "./App.css";
 import FullCalendar from "@fullcalendar/react";
 import resourceTimelinePlugin from "@fullcalendar/resource-timeline";
-import eventData from "./generated_data/events.json";
-import resourceData from "./generated_data/resources.json";
 import ReactTooltip from "react-tooltip";
 import interactionPlugin from "@fullcalendar/interaction";
+import { Helmet } from "react-helmet";
+import eventData from "./generated_data/events.json";
+import resourceData from "./generated_data/resources.json";
+import configData from "./generated_data/config.json";
 
 export default class App extends React.Component {
   calendarRef = React.createRef();
   render() {
     return (
       <div id="calendar">
+        <Helmet>
+          <title>{configData['title']}</title>
+        </Helmet>
         <FullCalendar
           ref={this.calendarRef}
           plugins={[resourceTimelinePlugin, interactionPlugin]}
@@ -51,20 +56,26 @@ export default class App extends React.Component {
 
   handleEventPositioned(info) {
     const title = generateTitle(info.event);
-    info.el.setAttribute(
-      "data-tip",
-      title
-    );
+    info.el.setAttribute("data-tip", title);
     ReactTooltip.rebuild();
   }
 }
 
 function generateTitle(event) {
-  const options = { month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+  const options = {
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric"
+  };
   const resource = event.getResources()[0].title;
-  let eventTitle = resource + " " + event.title
-  if(event.start && event.end) {
-    eventTitle += " " + event.start.toLocaleString("en-US", options) + " - " + event.end.toLocaleDateString("en-US", options)
+  let eventTitle = resource + " " + event.title;
+  if (event.start && event.end) {
+    eventTitle +=
+      " " +
+      event.start.toLocaleString("en-US", options) +
+      " - " +
+      event.end.toLocaleDateString("en-US", options);
   }
   return eventTitle;
 }

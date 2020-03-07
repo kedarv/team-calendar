@@ -1,3 +1,4 @@
+calendar_name: "My Team Calendar"
 users:
   - someuser@somedomain.com
 pagerduty:
